@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_codefactory_practice2/const/colors.dart';
+import 'package:flutter_codefactory_practice2/models/stat_model.dart';
+import 'package:flutter_codefactory_practice2/utils/status_utils.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 
 class CategoryStat extends StatelessWidget {
-  final List<int> numbers = List.generate(6, (idx) => idx);
-  CategoryStat({super.key});
+  final Region region;
+  CategoryStat({super.key, required this.region});
 
   @override
   Widget build(BuildContext context) {
@@ -67,40 +71,59 @@ class CategoryStat extends StatelessWidget {
           child: ListView(
             physics: const PageScrollPhysics(),
             scrollDirection: Axis.horizontal,
-            children: List.generate(
-                6,
-                (idx) => _typeStatistics(
-                      constraint,
-                      '미세먼지',
-                      'asset/img/bad.png',
-                      '46.0',
-                    )),
+            children: ItemCode.values
+                .map((e) => _typeStatistics(
+                    constraint, '미세먼지', 'asset/img/bad.png', '46.0', e))
+                .toList(),
           )),
     );
   }
 
   //종류별 통계 상세
-  Widget _typeStatistics(
-      BoxConstraints constraint, String type, String url, String value) {
-    return SizedBox(
-      width: constraint.maxWidth / 3,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(type),
-          const SizedBox(
-            height: 8.0,
-          ),
-          Image.asset(
-            url,
-            width: 50,
-          ),
-          const SizedBox(
-            height: 8.0,
-          ),
-          Text(value),
-        ],
-      ),
-    );
+  Widget _typeStatistics(BoxConstraints constraint, String type, String url,
+      String value, ItemCode itemCode) {
+    return FutureBuilder(
+        future: GetIt.I<Isar>()
+            .statModels
+            .filter()
+            .regionEqualTo(region)
+            .itemCodeEqualTo(itemCode)
+            .sortByDateTimeDesc()
+            .findFirst(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(snapshot.error.toString()),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Center();
+          }
+
+          final statModel = snapshot.data!;
+          final statusModel =
+              StatusUtils.getStatusModelFromStat(model: statModel);
+
+          return SizedBox(
+            width: constraint.maxWidth / 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(itemCode.krName),
+                const SizedBox(
+                  height: 8.0,
+                ),
+                Image.asset(
+                  statusModel.imgPath,
+                  width: 50,
+                ),
+                const SizedBox(
+                  height: 8.0,
+                ),
+                Text(statModel.stat.toString()),
+              ],
+            ),
+          );
+        });
   }
 }

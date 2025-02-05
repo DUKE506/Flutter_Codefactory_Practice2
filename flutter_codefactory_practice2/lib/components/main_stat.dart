@@ -1,15 +1,24 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DateUtils;
+import 'package:flutter_codefactory_practice2/const/status_level.dart';
 import 'package:flutter_codefactory_practice2/main.dart';
 import 'package:flutter_codefactory_practice2/models/stat_model.dart';
+import 'package:flutter_codefactory_practice2/utils/date_utils.dart';
+import 'package:flutter_codefactory_practice2/utils/status_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 
 class MainStat extends StatelessWidget {
+  final Region region;
+
   final ts = TextStyle(
     color: Colors.white,
     fontSize: 40.0,
   );
-  MainStat({super.key});
+
+  MainStat({
+    super.key,
+    required this.region,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +29,9 @@ class MainStat extends StatelessWidget {
             future: GetIt.I<Isar>()
                 .statModels
                 .filter()
-                .regionEqualTo(Region.seoul)
+                .regionEqualTo(region)
                 .itemCodeEqualTo(ItemCode.PM10)
+                .sortByDateTimeDesc()
                 .findFirst(),
             builder: (context, snapshot) {
               if (!snapshot.hasData &&
@@ -30,30 +40,34 @@ class MainStat extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 );
               }
+
               if (!snapshot.hasData) {
                 return const Center(
                   child: Text('데이터가 존재하지 않습니다.'),
                 );
               }
 
-              final statModel = snapshot.data;
+              final statModel = snapshot.data!;
+
+              final status =
+                  StatusUtils.getStatusModelFromStat(model: statModel);
 
               return Column(
                 children: [
-                  _location(statModel!.region.KrName),
-                  _date(''),
+                  _location(statModel.region.KrName),
+                  _date(DateUtils.DateTimeToString(date: statModel.dateTime)),
                   SizedBox(
                     height: 20.0,
                   ),
                   _image(
                     context,
-                    'asset/img/good.png',
+                    status.imgPath,
                   ),
                   SizedBox(
                     height: 20.0,
                   ),
-                  _status('보통'),
-                  _comment('나쁘지 않네요!'),
+                  _status(status.label),
+                  _comment(status.comment),
                 ],
               );
             }),

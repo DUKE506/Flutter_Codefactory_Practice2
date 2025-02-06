@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 
 class MainStat extends StatelessWidget {
+  final Color primaryColor;
   final Region region;
 
   final ts = TextStyle(
@@ -18,59 +19,74 @@ class MainStat extends StatelessWidget {
   MainStat({
     super.key,
     required this.region,
+    required this.primaryColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SizedBox(
+    return SliverAppBar(
+      backgroundColor: primaryColor,
+      expandedHeight: 500,
+      title: SizedBox(
         width: double.infinity,
-        child: FutureBuilder<StatModel?>(
-            future: GetIt.I<Isar>()
-                .statModels
-                .filter()
-                .regionEqualTo(region)
-                .itemCodeEqualTo(ItemCode.PM10)
-                .sortByDateTimeDesc()
-                .findFirst(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+        child: Text(
+          region.KrName,
+          textAlign: TextAlign.center,
+        ),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: FutureBuilder<StatModel?>(
+                future: GetIt.I<Isar>()
+                    .statModels
+                    .filter()
+                    .regionEqualTo(region)
+                    .itemCodeEqualTo(ItemCode.PM10)
+                    .sortByDateTimeDesc()
+                    .findFirst(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData &&
+                      snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: Text('데이터가 존재하지 않습니다.'),
-                );
-              }
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: Text('데이터가 존재하지 않습니다.'),
+                    );
+                  }
 
-              final statModel = snapshot.data!;
+                  final statModel = snapshot.data!;
 
-              final status =
-                  StatusUtils.getStatusModelFromStat(model: statModel);
+                  final status =
+                      StatusUtils.getStatusModelFromStat(model: statModel);
 
-              return Column(
-                children: [
-                  _location(statModel.region.KrName),
-                  _date(DateUtils.DateTimeToString(date: statModel.dateTime)),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  _image(
-                    context,
-                    status.imgPath,
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  _status(status.label),
-                  _comment(status.comment),
-                ],
-              );
-            }),
+                  return Column(
+                    children: [
+                      _location(statModel.region.KrName),
+                      _date(
+                          DateUtils.DateTimeToString(date: statModel.dateTime)),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      _image(
+                        context,
+                        status.imgPath,
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      _status(status.label),
+                      _comment(status.comment),
+                    ],
+                  );
+                }),
+          ),
+        ),
       ),
     );
   }

@@ -6,10 +6,14 @@ import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 
 class HourlyStat extends StatelessWidget {
+  final Color lightColor;
+  final Color darkColor;
   final Region region;
   const HourlyStat({
     super.key,
     required this.region,
+    required this.darkColor,
+    required this.lightColor,
   });
 
   @override
@@ -52,7 +56,7 @@ class HourlyStat extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _header(title: itemCode.krName),
+                          _header(title: itemCode.krName, darkColor: darkColor),
                           _content(statModel: stats),
                         ],
                       ),
@@ -67,20 +71,22 @@ class HourlyStat extends StatelessWidget {
   //헤더
   Widget _header({
     required String title,
+    required Color darkColor,
   }) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
           color: darkColor,
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(16.0),
             topRight: Radius.circular(16.0),
           )),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Text(
-          '시간별 ${title}',
+          '시간별 $title',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
       ),
     );

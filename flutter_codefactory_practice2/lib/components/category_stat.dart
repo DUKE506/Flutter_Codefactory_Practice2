@@ -6,8 +6,15 @@ import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 
 class CategoryStat extends StatelessWidget {
+  final Color darkColor;
+  final Color lightColor;
   final Region region;
-  CategoryStat({super.key, required this.region});
+  CategoryStat({
+    super.key,
+    required this.region,
+    required this.darkColor,
+    required this.lightColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +31,8 @@ class CategoryStat extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _header(),
-                _content(constraint),
+                _header(darkColor),
+                _content(constraint, lightColor),
               ],
             );
           }),
@@ -35,9 +42,9 @@ class CategoryStat extends StatelessWidget {
   }
 
   //헤더
-  Widget _header() {
+  Widget _header(Color darkColor) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: darkColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16.0),
@@ -59,12 +66,12 @@ class CategoryStat extends StatelessWidget {
   }
 
   //내용
-  Widget _content(BoxConstraints constraint) {
+  Widget _content(BoxConstraints constraint, Color lightColor) {
     return Expanded(
       child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
               color: lightColor,
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16.0),
                 bottomRight: Radius.circular(16.0),
               )),
